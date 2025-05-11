@@ -18,8 +18,10 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
+      - name: Install dependencies in api
+        working-directory: api
         run: npm ci
 
-      - name: Run ESLint
+      - name: Run ESLint in api
+        working-directory: api
         run: npm run lint
