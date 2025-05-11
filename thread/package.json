@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "lint": "eslint .",
+    "test": "vitest",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
@@ -17,8 +18,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "@vue/test-utils": "^2.4.6",
     "eslint": "^9.26.0",
     "eslint-plugin-vue": "^10.1.0",
-    "globals": "^16.1.0"
+    "globals": "^16.1.0",
+    "jsdom": "^26.1.0",
+    "vitest": "^3.1.3"
   }
 }
