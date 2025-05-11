@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  api:
+    build: ./api
+    ports:
+      - "3000:3000"
+    networks:
+      - forum-net
+
+  thread:
+    build: ./thread
+    ports:
+      - "80:3000"
+    depends_on:
+      - api
+    networks:
+      - forum-net
+
+  sender:
+    build: ./sender
+    ports:
+      - "8080:3000"
+    depends_on:
+      - api
+    networks:
+      - forum-net
+
+networks:
+  forum-net:
+    driver: bridge
