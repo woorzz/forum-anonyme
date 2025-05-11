@@ -4,6 +4,15 @@ const pool   = require('./db.js');
 const app = express();
 app.use(express.json());
 
+app.get('/hello', async (_, res) => {
+  try {
+    res.json({ message: 'Hello World!' });
+  } catch (err) {
+    res.status(500).json({ error: 'DB error', details: err.message });
+  }
+});
+
+
 app.get('/test', async (_, res) => {
   try {
     const { rows } = await pool.query('SELECT 1 AS ok');
