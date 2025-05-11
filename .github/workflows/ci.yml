@@ -1,4 +1,4 @@
-name: Lint API
+name: Lint all services
 
 on:
   push:
@@ -9,8 +9,11 @@ on:
 jobs:
   eslint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [api, thread, sender]
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -18,10 +21,10 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies in api
-        working-directory: api
+      - name: Install dependencies ({{ matrix.service }})
+        working-directory: ${{ matrix.service }}
         run: npm ci
 
-      - name: Run ESLint in api
-        working-directory: api
+      - name: Run ESLint ({{ matrix.service }})
+        working-directory: ${{ matrix.service }}
         run: npm run lint
