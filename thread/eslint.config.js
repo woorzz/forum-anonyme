@@ -22,5 +22,16 @@ export default defineConfig([
     rules: {
       "vue/multi-word-component-names": "off",
     },
-  },
+  },   {
+    files: ["test/**/*.test.{js,ts,vue}"],
+    languageOptions: {
+      globals: {
+        describe: "readonly",
+        it: "readonly",
+        expect: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+      }
+    }
+  }
 ]);
