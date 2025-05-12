@@ -15,15 +15,15 @@ router.get('/', async (req, res) => {
 
 
 router.post('/', async (req, res) => {
-  const { pseudo, content } = req.body;
-  if (!pseudo || !content) {
-    return res.status(400).json({ error: 'pseudo and content are required' });
+  const { pseudo, text } = req.body;
+  if (!pseudo || !text) {
+    return res.status(400).json({ error: 'pseudo and text are required' });
   }
 
   try {
     const { rows } = await pool.query(
-      'INSERT INTO messages (pseudo, content) VALUES ($1, $2) RETURNING *',
-      [pseudo, content]
+      'INSERT INTO messages (pseudo, text) VALUES ($1, $2) RETURNING *',
+      [pseudo, text]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
