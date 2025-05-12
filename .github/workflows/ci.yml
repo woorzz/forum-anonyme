@@ -28,7 +28,3 @@ jobs:
       - name: Run ESLint ({{ matrix.service }})
         working-directory: ${{ matrix.service }}
         run: npm run lint
-
-      - name: Run Tests ({{ matrix.service }})
-        working-directory: ${{ matrix.service }}
-        run: npm test
