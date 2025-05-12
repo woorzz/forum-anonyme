@@ -8,3 +8,4 @@ COPY . .
 
 EXPOSE 3000
 CMD ["node", "index.js"]
+LABEL org.opencontainers.image.source="https://github.com/woorzz/forum-anonyme"

@@ -10,3 +10,4 @@ WORKDIR /app
 COPY --from=builder /app/.output ./.output
 EXPOSE 3000
 CMD ["node", ".output/server/index.mjs"]
+LABEL org.opencontainers.image.source="https://github.com/woorzz/forum-anonyme"
