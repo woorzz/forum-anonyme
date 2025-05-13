@@ -32,16 +32,9 @@
 <script setup>
 import { useFetch } from '#app'
 import NavBar from '~/components/NavBar.vue'
-
+import { formatDate } from '~/utils/format';
 
 const { data: messages, pending, error } = await useFetch('http://api:3000/messages')
 
-
-function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleString('fr-FR', {
-    dateStyle: 'short',
-    timeStyle: 'short'
-  })
-}
 </script>
 
