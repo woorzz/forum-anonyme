@@ -9,6 +9,7 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./api/db/script.sql:/docker-entrypoint-initdb.d/01-init.sql
     networks:
       - forum-net
 
