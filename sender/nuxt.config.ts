@@ -6,7 +6,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || process.env.API_URL || 'http://localhost:3000'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || process.env.API_URL || 'http://localhost:3000',
+      senderUrl: process.env.NUXT_PUBLIC_SENDER_URL || 'http://localhost:8080',
+      threadUrl: process.env.NUXT_PUBLIC_THREAD_URL || 'http://localhost:80'
     }
   },
   css: ['~/assets/css/main.css'],
