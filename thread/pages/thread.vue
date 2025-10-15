@@ -38,33 +38,31 @@
 <script setup>
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
-import { useRuntimeConfig } from '#app'
-
-// Utiliser uniquement la configuration runtime de Nuxt
-const config = useRuntimeConfig()
-const API_BASE = config.public.apiBase
-
+import { useEnvConfig } from '@/composables/useEnvConfig'
 const messages = ref([])
 const pending = ref(true)
 const error = ref(null)
 
-onMounted(async () => {
+const loadMessages = async () => {
   try {
-    console.log('API_BASE utilisé:', API_BASE)
-    const response = await axios.get(`${API_BASE}/messages`)
+    const envConfig = useEnvConfig()
+    console.log('API_BASE utilisé:', envConfig.apiBase)
+    const response = await axios.get(`${envConfig.apiBase}/messages`)
     messages.value = response.data
+    pending.value = false
   } catch (err) {
-    error.value = err
     console.error('Erreur lors du chargement des messages:', err)
-  } finally {
+    error.value = err
     pending.value = false
   }
+}
+
+onMounted(() => {
+  loadMessages()
 })
 
-function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleString('fr-FR', {
-    dateStyle: 'short',
-    timeStyle: 'short'
-  })
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleString('fr-FR')
 }
 </script>

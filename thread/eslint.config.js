@@ -5,7 +5,7 @@ import { defineConfig } from "eslint/config";
 
 export default defineConfig([
   {
-    ignores: [".nuxt/**", "node_modules/**"]
+    ignores: [".nuxt/**", "node_modules/**", ".output/**"]
   },
   {
     files: ["**/*.{js,mjs,cjs,vue}"],

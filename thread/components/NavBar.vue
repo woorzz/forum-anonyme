@@ -7,13 +7,13 @@
 
       <div class="flex space-x-6">
         <a
-          :href="`${config.public.threadUrl}/thread`"
+          :href="`${envConfig.threadUrl}/thread`"
           class="text-gray-700 font-medium hover:text-blue-600 transition"
         >
           Lire les messages
         </a>
         <a
-          :href="`${config.public.senderUrl}/sender`"
+          :href="`${envConfig.senderUrl}/sender`"
           class="text-gray-700 font-medium hover:text-blue-600 transition"
         >
           Envoyer un message
@@ -24,7 +24,8 @@
 </template>
 
 <script setup>
-import { useRuntimeConfig } from '#app'
-
-const config = useRuntimeConfig()
+const envConfig = {
+  threadUrl: import.meta.env.VITE_THREAD_URL || '',
+  senderUrl: import.meta.env.VITE_SENDER_URL || ''
+}
 </script>

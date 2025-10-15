@@ -5,7 +5,7 @@ import { defineConfig } from "eslint/config";
 
 export default defineConfig([
   {
-    ignores: [".nuxt/**", "node_modules/**"]
+    ignores: [".nuxt/**", "node_modules/**", ".output/**"]
   },
   {
     files: ["**/*.{js,mjs,cjs,vue}"],
@@ -14,7 +14,22 @@ export default defineConfig([
   },
   {
     files: ["**/*.{js,mjs,cjs,vue}"],
-    languageOptions: { globals: globals.browser },
+    languageOptions: { 
+      globals: {
+        ...globals.browser,
+        // Node.js globals
+        process: "readonly",
+        // Nuxt auto-imports
+        useEnvConfig: "readonly",
+        useRuntimeConfig: "readonly",
+        navigateTo: "readonly",
+        onMounted: "readonly",
+        ref: "readonly",
+        computed: "readonly",
+        watch: "readonly",
+        defineComponent: "readonly",
+      }
+    },
   },
   pluginVue.configs["flat/essential"],
   {

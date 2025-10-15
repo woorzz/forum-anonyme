@@ -19,17 +19,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRuntimeConfig } from '#app'
-
-// Récupérer la configuration runtime
-const config = useRuntimeConfig()
-
+import { useEnvConfig } from '@/composables/useEnvConfig'
 // URL du sender (externe)
 const senderUrl = ref('')
 
 onMounted(() => {
-  // Le thread est sur la même application (lien relatif)
-  // Le sender est sur une autre application (URL complète)
-  senderUrl.value = `${config.public.senderUrl}/sender`
+  const envConfig = useEnvConfig()
+  senderUrl.value = `${envConfig.senderUrl}/sender`
 })
 </script>

@@ -43,15 +43,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRuntimeConfig } from '#app'
 import axios from 'axios'
 
 const pseudo = ref('')
 const content = ref('')
-
-// Utiliser uniquement la configuration runtime de Nuxt
-const config = useRuntimeConfig()
-const API_BASE = config.public.apiBase
 
 const sendMessage = async () => {
   if (!pseudo.value.trim() || !content.value.trim()) {
@@ -59,8 +54,9 @@ const sendMessage = async () => {
     return
   }
   try {
-    console.log('API_BASE utilisé:', API_BASE)
-    await axios.post(`${API_BASE}/messages`, {
+    const envConfig = useEnvConfig()
+    console.log('API_BASE utilisé:', envConfig.apiBase)
+    await axios.post(`${envConfig.apiBase}/messages`, {
       pseudo: pseudo.value,
       text: content.value,
     })

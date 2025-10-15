@@ -11,6 +11,13 @@ export default defineNuxtConfig({
       threadUrl: process.env.NUXT_PUBLIC_THREAD_URL || 'http://localhost:80'
     }
   },
+  app: {
+    head: {
+      script: [
+        { src: '/config.js', type: 'text/javascript' }
+      ]
+    }
+  },
   css: ['~/assets/css/main.css'],
   vite: {
     plugins: [
