@@ -77,7 +77,7 @@ resource "aws_instance" "api" {
     docker rm marinelangrez-api 2>/dev/null || true
     
     # Utiliser votre image API précompilée depuis GitHub Container Registry
-    docker pull ghcr.io/woorzz/forum-anonyme/api:06bb140
+    docker pull ghcr.io/woorzz/forum-anonyme-api:${var.image_tag}
     docker run -d --name marinelangrez-api \
       -p 3000:3000 \
       -e DB_HOST=${aws_instance.database.private_ip} \
@@ -86,7 +86,7 @@ resource "aws_instance" "api" {
       -e DB_NAME=forum \
       -e DB_PORT=5432 \
       --restart unless-stopped \
-      ghcr.io/woorzz/forum-anonyme/api:06bb140
+      ghcr.io/woorzz/forum-anonyme-api:${var.image_tag}
     
     # Logs de debug
     echo "API Docker containers:" > /var/log/docker-setup.log
@@ -137,12 +137,12 @@ resource "aws_instance" "thread" {
     docker rm marinelangrez-thread 2>/dev/null || true
     
     # Utiliser votre image Thread précompilée depuis GitHub Container Registry
-    docker pull ghcr.io/woorzz/forum-anonyme/thread:v2-1760515849
+    docker pull ghcr.io/woorzz/forum-anonyme-thread:${var.image_tag}
     docker run -d --name marinelangrez-thread \
       -p 80:3000 \
       -e API_URL=http://${aws_instance.api.private_ip}:3000 \
       --restart unless-stopped \
-      ghcr.io/woorzz/forum-anonyme/thread:v2-1760515849
+      ghcr.io/woorzz/forum-anonyme-thread:${var.image_tag}
     
     # Logs de debug  
     echo "Thread Docker containers:" > /var/log/docker-setup.log
@@ -196,12 +196,12 @@ resource "aws_instance" "sender" {
     docker rm marinelangrez-sender 2>/dev/null || true
     
     # Utiliser votre image Sender précompilée depuis GitHub Container Registry
-    docker pull ghcr.io/woorzz/forum-anonyme/sender:06bb140
+    docker pull ghcr.io/woorzz/forum-anonyme-sender:${var.image_tag}
     docker run -d --name marinelangrez-sender \
       -p 8080:3000 \
       -e API_URL=http://${aws_instance.api.private_ip}:3000 \
       --restart unless-stopped \
-      ghcr.io/woorzz/forum-anonyme/sender:06bb140
+      ghcr.io/woorzz/forum-anonyme-sender:${var.image_tag}
     
     # Logs de debug
     echo "Docker containers:" > /var/log/docker-setup.log
