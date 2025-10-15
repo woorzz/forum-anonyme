@@ -19,6 +19,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRuntimeConfig } from '#app'
 
 // Récupérer la configuration runtime
 const config = useRuntimeConfig()
