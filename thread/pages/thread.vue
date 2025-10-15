@@ -38,6 +38,7 @@
 <script setup>
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
+import { useRuntimeConfig } from '#app'
 
 const config = useRuntimeConfig()
 const messages = ref([])

@@ -24,6 +24,8 @@
 </template>
 
 <script setup>
+import { useRuntimeConfig } from '#app'
+
 const config = useRuntimeConfig()
 const threadUrl = `${config.public.threadUrl}/thread`
 const senderUrl = `${config.public.senderUrl}/sender`
