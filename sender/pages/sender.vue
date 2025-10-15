@@ -45,7 +45,6 @@
 import { ref } from 'vue'
 import axios from 'axios'
 
-const config = useRuntimeConfig()
 const pseudo = ref('')
 const content = ref('')
 
@@ -55,7 +54,11 @@ const sendMessage = async () => {
     return
   }
   try {
-    const API_BASE = config.public.apiUrl
+    // Utiliser window.RUNTIME_CONFIG comme pour les autres pages
+    const API_BASE = (typeof window !== 'undefined' && window.RUNTIME_CONFIG) 
+      ? window.RUNTIME_CONFIG.API_URL 
+      : 'http://localhost:3000'
+      
     console.log('API_BASE utilisé:', API_BASE)
     await axios.post(`${API_BASE}/messages`, {
       pseudo: pseudo.value,
