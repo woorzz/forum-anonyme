@@ -8,58 +8,53 @@ on:
 
 permissions:
   contents: read
-  packages: write 
+  packages: write
 
 jobs:
   eslint:
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        service: [api, thread, sender]
+      matrix: { service: [api, thread, sender] }
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      - name: Install dependencies (${{ matrix.service }})
+        with: { node-version: '18' }
+      - name: Install (${{ matrix.service }})
         working-directory: ${{ matrix.service }}
         run: npm ci
-      - name: Run ESLint (${{ matrix.service }})
+      - name: Lint (${{ matrix.service }})
         working-directory: ${{ matrix.service }}
         run: npm run lint
-      - name: Run Tests (${{ matrix.service }})
+      - name: Test (${{ matrix.service }})
         working-directory: ${{ matrix.service }}
         run: npm test
 
   docker:
     runs-on: ubuntu-latest
     needs: eslint
-    if: github.event_name == 'push' 
+    if: github.event_name == 'push'
     strategy:
-      matrix:
-        service: [api, thread, sender]
+      matrix: { service: [api, thread, sender] }
     steps:
       - uses: actions/checkout@v3
 
-      - name: Log in to GitHub Container Registry
+      - name: Login GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}  
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract short SHA
+      - name: Short SHA
         id: vars
         run: echo "sha_short=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
-      - name: Build Docker image
+      - name: Build & Push
         env:
           SERVICE: ${{ matrix.service }}
+          OWNER: ${{ github.repository_owner }}
+          TAG: ${{ steps.vars.outputs.sha_short }}
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/$SERVICE:${{ steps.vars.outputs.sha_short }} $SERVICE
-
-      - name: Push Docker image
-        env:
-          SERVICE: ${{ matrix.service }}
-        run: |
-          docker push ghcr.io/${{ github.repository }}/$SERVICE:${{ steps.vars.outputs.sha_short }}
+          IMAGE="ghcr.io/${OWNER}/forum-anonyme-${SERVICE}:${TAG}"
+          docker build -t "$IMAGE" "$SERVICE"
+          docker push "$IMAGE"
