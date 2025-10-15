@@ -48,15 +48,23 @@ import axios from 'axios'
 const pseudo = ref('')
 const content = ref('')
 
+// Utiliser window.RUNTIME_CONFIG au lieu de useRuntimeConfig
+const getApiBase = () => {
+  if (typeof window !== 'undefined' && window.RUNTIME_CONFIG) {
+    return window.RUNTIME_CONFIG.API_URL
+  }
+  return 'http://localhost:3000'
+}
+
 const sendMessage = async () => {
   if (!pseudo.value.trim() || !content.value.trim()) {
     alert('Merci de remplir pseudo et message !')
     return
   }
   try {
-    const envConfig = useEnvConfig()
-    console.log('API_BASE utilisé:', envConfig.apiBase)
-    await axios.post(`${envConfig.apiBase}/messages`, {
+    const API_BASE = getApiBase()
+    console.log('API_BASE utilisé:', API_BASE)
+    await axios.post(`${API_BASE}/messages`, {
       pseudo: pseudo.value,
       text: content.value,
     })

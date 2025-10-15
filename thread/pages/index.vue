@@ -19,12 +19,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useEnvConfig } from '@/composables/useEnvConfig'
+
 // URL du sender (externe)
-const senderUrl = ref('')
+const senderUrl = ref('http://localhost:8080/sender')
 
 onMounted(() => {
-  const envConfig = useEnvConfig()
-  senderUrl.value = `${envConfig.senderUrl}/sender`
+  if (typeof window !== 'undefined' && window.RUNTIME_CONFIG) {
+    senderUrl.value = `${window.RUNTIME_CONFIG.SENDER_URL}/sender`
+  }
 })
 </script>

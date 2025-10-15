@@ -7,13 +7,13 @@
 
       <div class="flex space-x-6">
         <a
-          :href="`${envConfig.threadUrl}/thread`"
+          :href="threadUrl"
           class="text-gray-700 font-medium hover:text-blue-600 transition"
         >
           Lire les messages
         </a>
         <a
-          :href="`${envConfig.senderUrl}/sender`"
+          :href="senderUrl"
           class="text-gray-700 font-medium hover:text-blue-600 transition"
         >
           Envoyer un message
@@ -24,8 +24,15 @@
 </template>
 
 <script setup>
-const envConfig = {
-  threadUrl: import.meta.env.VITE_THREAD_URL || '',
-  senderUrl: import.meta.env.VITE_SENDER_URL || ''
-}
+import { ref, onMounted } from 'vue'
+
+const threadUrl = ref('http://localhost/thread')
+const senderUrl = ref('http://localhost:8080/sender')
+
+onMounted(() => {
+  if (typeof window !== 'undefined' && window.RUNTIME_CONFIG) {
+    threadUrl.value = `${window.RUNTIME_CONFIG.THREAD_URL}/thread`
+    senderUrl.value = `${window.RUNTIME_CONFIG.SENDER_URL}/sender`
+  }
+})
 </script>

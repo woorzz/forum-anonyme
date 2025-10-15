@@ -202,3 +202,61 @@ resource "aws_instance" "sender" {
     Owner = "MarineLangrez"
   }
 }
+
+# ============================================
+# Injection des configurations runtime
+# ============================================
+
+# Injection config.js pour Thread
+resource "null_resource" "inject_thread_config" {
+  depends_on = [aws_instance.thread, aws_instance.sender, aws_instance.api]
+
+  triggers = {
+    thread_ip = aws_instance.thread.public_ip
+    sender_ip = aws_instance.sender.public_ip
+    api_ip    = aws_instance.api.public_ip
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file(var.private_key_path)
+    host        = aws_instance.thread.public_ip
+    timeout     = "5m"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sleep 120",  # Attendre que Docker et le conteneur soient prêts
+      "until sudo docker ps | grep marinelangrez-thread; do sleep 5; done",
+      "sudo docker exec marinelangrez-thread sh -c \"echo 'window.RUNTIME_CONFIG = { API_URL: \\\"http://${aws_instance.api.public_ip}:3000\\\", SENDER_URL: \\\"http://${aws_instance.sender.public_ip}:8080\\\", THREAD_URL: \\\"http://${aws_instance.thread.public_ip}\\\" };' > /app/.output/public/config.js\""
+    ]
+  }
+}
+
+# Injection config.js pour Sender
+resource "null_resource" "inject_sender_config" {
+  depends_on = [aws_instance.thread, aws_instance.sender, aws_instance.api]
+
+  triggers = {
+    thread_ip = aws_instance.thread.public_ip
+    sender_ip = aws_instance.sender.public_ip
+    api_ip    = aws_instance.api.public_ip
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file(var.private_key_path)
+    host        = aws_instance.sender.public_ip
+    timeout     = "5m"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sleep 120",  # Attendre que Docker et le conteneur soient prêts
+      "until sudo docker ps | grep marinelangrez-sender; do sleep 5; done",
+      "sudo docker exec marinelangrez-sender sh -c \"echo 'window.RUNTIME_CONFIG = { API_URL: \\\"http://${aws_instance.api.public_ip}:3000\\\", SENDER_URL: \\\"http://${aws_instance.sender.public_ip}:8080\\\", THREAD_URL: \\\"http://${aws_instance.thread.public_ip}\\\" };' > /app/.output/public/config.js\""
+    ]
+  }
+}

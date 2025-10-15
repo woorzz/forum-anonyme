@@ -21,10 +21,11 @@
 import { ref, onMounted } from 'vue'
 
 // URL du thread (externe)
-const threadUrl = ref('')
+const threadUrl = ref('http://localhost/thread')
 
 onMounted(() => {
-  const envConfig = useEnvConfig()
-  threadUrl.value = `${envConfig.threadUrl}/thread`
+  if (typeof window !== 'undefined' && window.RUNTIME_CONFIG) {
+    threadUrl.value = `${window.RUNTIME_CONFIG.THREAD_URL}/thread`
+  }
 })
 </script>

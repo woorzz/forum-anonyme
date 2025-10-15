@@ -38,31 +38,37 @@
 <script setup>
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
-import { useEnvConfig } from '@/composables/useEnvConfig'
+
 const messages = ref([])
 const pending = ref(true)
 const error = ref(null)
 
-const loadMessages = async () => {
-  try {
-    const envConfig = useEnvConfig()
-    console.log('API_BASE utilisé:', envConfig.apiBase)
-    const response = await axios.get(`${envConfig.apiBase}/messages`)
-    messages.value = response.data
-    pending.value = false
-  } catch (err) {
-    console.error('Erreur lors du chargement des messages:', err)
-    error.value = err
-    pending.value = false
+// Utiliser window.RUNTIME_CONFIG au lieu de useRuntimeConfig
+const getApiBase = () => {
+  if (typeof window !== 'undefined' && window.RUNTIME_CONFIG) {
+    return window.RUNTIME_CONFIG.API_URL
   }
+  return 'http://localhost:3000'
 }
 
-onMounted(() => {
-  loadMessages()
+onMounted(async () => {
+  try {
+    const API_BASE = getApiBase()
+    console.log('API_BASE utilisé:', API_BASE)
+    const response = await axios.get(`${API_BASE}/messages`)
+    messages.value = response.data
+  } catch (err) {
+    error.value = err
+    console.error('Erreur lors du chargement des messages:', err)
+  } finally {
+    pending.value = false
+  }
 })
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleString('fr-FR')
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleString('fr-FR', {
+    dateStyle: 'short',
+    timeStyle: 'short'
+  })
 }
 </script>
