@@ -48,13 +48,16 @@ import axios from 'axios'
 const pseudo = ref('')
 const content = ref('')
 
+// Configuration de l'API - URL AWS déployée
+const API_BASE = 'http://63.178.42.124:3000'
+
 const sendMessage = async () => {
   if (!pseudo.value.trim() || !content.value.trim()) {
     alert('Merci de remplir pseudo et message !')
     return
   }
   try {
-    await axios.post('http://localhost:3000/messages', {
+    await axios.post(`${API_BASE}/messages`, {
       pseudo: pseudo.value,
       text: content.value,
     })

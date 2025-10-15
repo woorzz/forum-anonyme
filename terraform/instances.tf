@@ -137,12 +137,12 @@ resource "aws_instance" "thread" {
     docker rm marinelangrez-thread 2>/dev/null || true
     
     # Utiliser votre image Thread précompilée depuis GitHub Container Registry
-    docker pull ghcr.io/woorzz/forum-anonyme/thread:06bb140
+    docker pull ghcr.io/woorzz/forum-anonyme/thread:v2-1760515849
     docker run -d --name marinelangrez-thread \
       -p 80:3000 \
       -e API_URL=http://${aws_instance.api.private_ip}:3000 \
       --restart unless-stopped \
-      ghcr.io/woorzz/forum-anonyme/thread:06bb140
+      ghcr.io/woorzz/forum-anonyme/thread:v2-1760515849
     
     # Logs de debug  
     echo "Thread Docker containers:" > /var/log/docker-setup.log

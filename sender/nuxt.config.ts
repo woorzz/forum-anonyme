@@ -3,7 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   runtimeConfig: {
     public: {
-      apiBase: process.env.API_BASE || 'http://api:3000'
+      apiBase: process.env.API_URL || 'http://localhost:3000'
     }
   },
   css: ['~/assets/css/main.css'],
@@ -11,7 +11,8 @@ export default defineNuxtConfig({
     plugins: [
       tailwindcss(),
     ],
+    define: {
+      __API_URL__: JSON.stringify(process.env.API_URL || 'http://localhost:3000')
+    }
   },
-
-
-})
+});

@@ -36,9 +36,27 @@
 
 
 <script setup>
-import { useFetch } from '#app'
+import axios from 'axios'
+import { ref, onMounted } from 'vue'
 
-const { data: messages, pending, error } = await useFetch('http://api:3000/messages')
+// Configuration de l'API - URL AWS déployée
+const API_BASE = 'http://63.178.42.124:3000'
+
+const messages = ref([])
+const pending = ref(true)
+const error = ref(null)
+
+onMounted(async () => {
+  try {
+    const response = await axios.get(`${API_BASE}/messages`)
+    messages.value = response.data
+  } catch (err) {
+    error.value = err
+    console.error('Erreur lors du chargement des messages:', err)
+  } finally {
+    pending.value = false
+  }
+})
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleString('fr-FR', {
