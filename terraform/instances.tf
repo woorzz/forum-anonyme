@@ -1,4 +1,6 @@
-# Instance EC2 pour la base de données PostgreSQL
+# ============================================
+# Instance EC2 - Base de données PostgreSQL
+# ============================================
 resource "aws_instance" "database" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
@@ -22,7 +24,7 @@ resource "aws_instance" "database" {
       --restart unless-stopped \
       postgres:15-alpine
     
-    # Attendre que postgres soit prêt et créer la table
+    # Attendre que PostgreSQL soit prêt puis créer la table
     sleep 30
     docker exec marinelangrez-postgres psql -U postgres -d forum -c "
       CREATE TABLE IF NOT EXISTS messages (
@@ -35,7 +37,7 @@ resource "aws_instance" "database" {
         ('MarineLangrez', 'Base de données déployée avec Terraform!'),
         ('System', 'PostgreSQL fonctionne parfaitement');
     "
-    EOF
+  EOF
   )
 
   tags = {
@@ -45,7 +47,9 @@ resource "aws_instance" "database" {
   }
 }
 
-# Instance EC2 pour l'API 
+# ============================================
+# Instance EC2 - API
+# ============================================
 resource "aws_instance" "api" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
@@ -56,46 +60,37 @@ resource "aws_instance" "api" {
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
-    # Version: ${formatdate("YYYY-MM-DD-hhmm", timestamp())}
     apt-get update -y
     apt-get install -y docker.io
     systemctl start docker
     systemctl enable docker
     usermod -aG docker ubuntu
-    
-    # Exporter le token GitHub dans une variable d'environnement
+
     export GITHUB_TOKEN="${var.github_token}"
-    
-    # Authentification GitHub Container Registry avec login explicite
     echo "$GITHUB_TOKEN" | docker login ghcr.io -u woorzz --password-stdin
     
-    # Attendre un peu pour que l'authentification soit effective
     sleep 10
     
-    # Arrêter et supprimer les conteneurs existants
     docker stop marinelangrez-api 2>/dev/null || true
     docker rm marinelangrez-api 2>/dev/null || true
     
-    # Utiliser votre image API précompilée depuis GitHub Container Registry
     docker pull ghcr.io/woorzz/forum-anonyme-api:${var.image_tag}
+    
     docker run -d --name marinelangrez-api \
       -p 3000:3000 \
       -e DB_HOST=${aws_instance.database.private_ip} \
-      -e DB_PASSWORD=${var.db_password} \
       -e DB_USER=postgres \
+      -e DB_PASSWORD=${var.db_password} \
       -e DB_NAME=forum \
       -e DB_PORT=5432 \
       --restart unless-stopped \
       ghcr.io/woorzz/forum-anonyme-api:${var.image_tag}
-    
-    # Logs de debug
-    echo "API Docker containers:" > /var/log/docker-setup.log
+
+    echo "API ready" > /var/log/docker-setup.log
     docker ps -a >> /var/log/docker-setup.log
-    docker logs marinelangrez-api >> /var/log/docker-setup.log 2>&1
-    EOF
+  EOF
   )
 
-  # Force la recréation de l'instance si user_data change
   user_data_replace_on_change = true
 
   tags = {
@@ -105,7 +100,9 @@ resource "aws_instance" "api" {
   }
 }
 
-# Instance EC2 pour Thread (interface de lecture)
+# ============================================
+# Instance EC2 - Thread (lecture)
+# ============================================
 resource "aws_instance" "thread" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
@@ -116,45 +113,36 @@ resource "aws_instance" "thread" {
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
-    # Version: ${formatdate("YYYY-MM-DD-hhmm", timestamp())}
     apt-get update -y
-    apt-get install -y docker.io
+    apt-get install -y docker.io curl
     systemctl start docker
     systemctl enable docker
     usermod -aG docker ubuntu
-    
-    # Exporter le token GitHub dans une variable d'environnement
+
     export GITHUB_TOKEN="${var.github_token}"
-    
-    # Authentification GitHub Container Registry avec login explicite
     echo "$GITHUB_TOKEN" | docker login ghcr.io -u woorzz --password-stdin
-    
-    # Attendre un peu pour que l'authentification soit effective
     sleep 10
-    
-    # Arrêter et supprimer les conteneurs existants
+
     docker stop marinelangrez-thread 2>/dev/null || true
     docker rm marinelangrez-thread 2>/dev/null || true
-    
-    # Utiliser votre image Thread précompilée depuis GitHub Container Registry
+
     docker pull ghcr.io/woorzz/forum-anonyme-thread:${var.image_tag}
+
+    # Récupérer sa propre IP publique via metadata
+    SELF_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+
     docker run -d --name marinelangrez-thread \
       -p 80:3000 \
-      -e API_URL=http://${aws_instance.api.public_ip}:3000 \
       -e NUXT_PUBLIC_API_BASE=http://${aws_instance.api.public_ip}:3000 \
-      -e NUXT_PUBLIC_SENDER_URL=http://${aws_instance.sender.public_ip}:8080 \
-      -e NUXT_PUBLIC_THREAD_URL=http://${aws_instance.thread.public_ip} \
+      -e NUXT_PUBLIC_THREAD_URL=http://$SELF_IP \
       --restart unless-stopped \
       ghcr.io/woorzz/forum-anonyme-thread:${var.image_tag}
-    
-    # Logs de debug  
-    echo "Thread Docker containers:" > /var/log/docker-setup.log
+
+    echo "Thread ready" > /var/log/docker-setup.log
     docker ps -a >> /var/log/docker-setup.log
-    docker logs marinelangrez-thread >> /var/log/docker-setup.log 2>&1
-    EOF
+  EOF
   )
 
-  # Force la recréation de l'instance si user_data change
   user_data_replace_on_change = true
 
   tags = {
@@ -164,7 +152,9 @@ resource "aws_instance" "thread" {
   }
 }
 
-# Instance EC2 pour Sender (interface d'envoi)
+# ============================================
+# Instance EC2 - Sender (envoi)
+# ============================================
 resource "aws_instance" "sender" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
@@ -175,53 +165,98 @@ resource "aws_instance" "sender" {
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
-    # Version: ${formatdate("YYYY-MM-DD-hhmm", timestamp())}
     apt-get update -y
-    apt-get install -y docker.io
+    apt-get install -y docker.io curl
     systemctl start docker
     systemctl enable docker
     usermod -aG docker ubuntu
-    
-    # Exporter le token GitHub dans une variable d'environnement
+
     export GITHUB_TOKEN="${var.github_token}"
-    
-    # Authentification GitHub Container Registry avec login explicite
     echo "$GITHUB_TOKEN" | docker login ghcr.io -u woorzz --password-stdin
-    
-    # Vérifier l'authentification
-    docker info | grep -A5 "Registry Mirrors"
-    
-    # Attendre un peu pour que l'authentification soit effective
     sleep 10
-    
-    # Arrêter et supprimer les conteneurs existants
+
     docker stop marinelangrez-sender 2>/dev/null || true
     docker rm marinelangrez-sender 2>/dev/null || true
-    
-    # Utiliser votre image Sender précompilée depuis GitHub Container Registry
+
     docker pull ghcr.io/woorzz/forum-anonyme-sender:${var.image_tag}
+
+    SELF_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+
     docker run -d --name marinelangrez-sender \
       -p 8080:3000 \
-      -e API_URL=http://${aws_instance.api.public_ip}:3000 \
       -e NUXT_PUBLIC_API_BASE=http://${aws_instance.api.public_ip}:3000 \
-      -e NUXT_PUBLIC_SENDER_URL=http://${aws_instance.sender.public_ip}:8080 \
-      -e NUXT_PUBLIC_THREAD_URL=http://${aws_instance.thread.public_ip} \
+      -e NUXT_PUBLIC_SENDER_URL=http://$SELF_IP:8080 \
       --restart unless-stopped \
       ghcr.io/woorzz/forum-anonyme-sender:${var.image_tag}
-    
-    # Logs de debug
-    echo "Docker containers:" > /var/log/docker-setup.log
+
+    echo "Sender ready" > /var/log/docker-setup.log
     docker ps -a >> /var/log/docker-setup.log
-    docker logs marinelangrez-sender >> /var/log/docker-setup.log 2>&1
-    EOF
+  EOF
   )
 
-  # Force la recréation de l'instance si user_data change
   user_data_replace_on_change = true
 
   tags = {
     Name  = "MarineLangrez-Forum-Sender"
     Type  = "Frontend"
     Owner = "MarineLangrez"
+  }
+}
+
+# ============================================
+# Mise à jour des conteneurs avec les URLs finales
+# ============================================
+
+# Mise à jour du conteneur thread avec l'URL du sender
+resource "null_resource" "update_thread_urls" {
+  depends_on = [aws_instance.thread, aws_instance.sender]
+
+  triggers = {
+    thread_ip = aws_instance.thread.public_ip
+    sender_ip = aws_instance.sender.public_ip
+    api_ip    = aws_instance.api.public_ip
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file("${var.private_key_path}")
+    host        = aws_instance.thread.public_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sleep 60", # Attendre que le conteneur initial soit démarré
+      "docker stop marinelangrez-thread || true",
+      "docker rm marinelangrez-thread || true",
+      "docker run -d --name marinelangrez-thread -p 80:3000 -e NUXT_PUBLIC_API_BASE=http://${aws_instance.api.public_ip}:3000 -e NUXT_PUBLIC_THREAD_URL=http://${aws_instance.thread.public_ip} -e NUXT_PUBLIC_SENDER_URL=http://${aws_instance.sender.public_ip}:8080 --restart unless-stopped ghcr.io/woorzz/forum-anonyme-thread:${var.image_tag}"
+    ]
+  }
+}
+
+# Mise à jour du conteneur sender avec l'URL du thread
+resource "null_resource" "update_sender_urls" {
+  depends_on = [aws_instance.thread, aws_instance.sender]
+
+  triggers = {
+    thread_ip = aws_instance.thread.public_ip
+    sender_ip = aws_instance.sender.public_ip
+    api_ip    = aws_instance.api.public_ip
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file("${var.private_key_path}")
+    host        = aws_instance.sender.public_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sleep 60", # Attendre que le conteneur initial soit démarré
+      "docker stop marinelangrez-sender || true",
+      "docker rm marinelangrez-sender || true",
+      "docker run -d --name marinelangrez-sender -p 8080:3000 -e NUXT_PUBLIC_API_BASE=http://${aws_instance.api.public_ip}:3000 -e NUXT_PUBLIC_SENDER_URL=http://${aws_instance.sender.public_ip}:8080 -e NUXT_PUBLIC_THREAD_URL=http://${aws_instance.thread.public_ip} --restart unless-stopped ghcr.io/woorzz/forum-anonyme-sender:${var.image_tag}"
+    ]
   }
 }

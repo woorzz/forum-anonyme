@@ -40,3 +40,9 @@ variable "image_tag" {
   type        = string
   default     = "e2d279d"
 }
+
+variable "private_key_path" {
+  description = "Path to the private key file for SSH access"
+  type        = string
+  default     = "~/.ssh/marinelangrez-forum-keypair.pem"
+}

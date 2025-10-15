@@ -7,13 +7,13 @@
 
       <div class="flex space-x-6">
         <a
-          href="http://localhost/thread"
+          :href="`${config.public.threadUrl}/thread`"
           class="text-gray-700 font-medium hover:text-blue-600 transition"
         >
           Lire les messages
         </a>
         <a
-          href="http://localhost:8080/sender"
+          :href="`${config.public.senderUrl}/sender`"
           class="text-gray-700 font-medium hover:text-blue-600 transition"
         >
           Envoyer un message
@@ -22,3 +22,9 @@
     </div>
   </nav>
 </template>
+
+<script setup>
+import { useRuntimeConfig } from '#app'
+
+const config = useRuntimeConfig()
+</script>
