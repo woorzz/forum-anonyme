@@ -28,7 +28,7 @@ resource "null_resource" "inject_thread_config" {
       "sleep 120",
       
       # Créer le nouveau config.js avec les bonnes URLs
-      "echo \"window.ENV_CONFIG = { NUXT_PUBLIC_API_BASE: 'http://${aws_instance.api.public_ip}:3000', NUXT_PUBLIC_SENDER_URL: 'http://${aws_instance.sender.public_ip}:8080', NUXT_PUBLIC_THREAD_URL: 'http://${aws_instance.thread.public_ip}' };\" > /tmp/config.js",
+      "echo \"window.RUNTIME_CONFIG = { API_URL: 'http://${aws_instance.api.public_ip}:3000', SENDER_URL: 'http://${aws_instance.sender.public_ip}:8080', THREAD_URL: 'http://${aws_instance.thread.public_ip}' };\" > /tmp/config.js",
       
       # Copier dans le conteneur
       "sudo docker cp /tmp/config.js marinelangrez-thread:/app/.output/public/config.js",
@@ -66,7 +66,7 @@ resource "null_resource" "inject_sender_config" {
       "sleep 120",
       
       # Créer le nouveau config.js avec les bonnes URLs
-      "echo \"window.ENV_CONFIG = { NUXT_PUBLIC_API_BASE: 'http://${aws_instance.api.public_ip}:3000', NUXT_PUBLIC_SENDER_URL: 'http://${aws_instance.sender.public_ip}:8080', NUXT_PUBLIC_THREAD_URL: 'http://${aws_instance.thread.public_ip}' };\" > /tmp/config.js",
+      "echo \"window.RUNTIME_CONFIG = { API_URL: 'http://${aws_instance.api.public_ip}:3000', SENDER_URL: 'http://${aws_instance.sender.public_ip}:8080', THREAD_URL: 'http://${aws_instance.thread.public_ip}' };\" > /tmp/config.js",
       
       # Copier dans le conteneur
       "sudo docker cp /tmp/config.js marinelangrez-sender:/app/.output/public/config.js",
