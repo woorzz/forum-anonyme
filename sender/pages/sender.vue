@@ -43,13 +43,15 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRuntimeConfig } from '#app'
 import axios from 'axios'
 
 const pseudo = ref('')
 const content = ref('')
 
-// Configuration de l'API - URL AWS déployée
-const API_BASE = 'http://63.178.42.124:3000'
+// Utiliser uniquement la configuration runtime de Nuxt
+const config = useRuntimeConfig()
+const API_BASE = config.public.apiBase
 
 const sendMessage = async () => {
   if (!pseudo.value.trim() || !content.value.trim()) {
@@ -57,6 +59,7 @@ const sendMessage = async () => {
     return
   }
   try {
+    console.log('API_BASE utilisé:', API_BASE)
     await axios.post(`${API_BASE}/messages`, {
       pseudo: pseudo.value,
       text: content.value,

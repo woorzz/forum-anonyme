@@ -140,7 +140,8 @@ resource "aws_instance" "thread" {
     docker pull ghcr.io/woorzz/forum-anonyme-thread:${var.image_tag}
     docker run -d --name marinelangrez-thread \
       -p 80:3000 \
-      -e API_URL=http://${aws_instance.api.private_ip}:3000 \
+      -e API_URL=http://${aws_instance.api.public_ip}:3000 \
+      -e NUXT_PUBLIC_API_BASE=http://${aws_instance.api.public_ip}:3000 \
       --restart unless-stopped \
       ghcr.io/woorzz/forum-anonyme-thread:${var.image_tag}
     
@@ -199,7 +200,8 @@ resource "aws_instance" "sender" {
     docker pull ghcr.io/woorzz/forum-anonyme-sender:${var.image_tag}
     docker run -d --name marinelangrez-sender \
       -p 8080:3000 \
-      -e API_URL=http://${aws_instance.api.private_ip}:3000 \
+      -e API_URL=http://${aws_instance.api.public_ip}:3000 \
+      -e NUXT_PUBLIC_API_BASE=http://${aws_instance.api.public_ip}:3000 \
       --restart unless-stopped \
       ghcr.io/woorzz/forum-anonyme-sender:${var.image_tag}
     

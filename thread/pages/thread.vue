@@ -38,9 +38,11 @@
 <script setup>
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
+import { useRuntimeConfig } from '#app'
 
-// Configuration de l'API - URL AWS déployée
-const API_BASE = 'http://63.178.42.124:3000'
+// Utiliser uniquement la configuration runtime de Nuxt
+const config = useRuntimeConfig()
+const API_BASE = config.public.apiBase
 
 const messages = ref([])
 const pending = ref(true)
@@ -48,6 +50,7 @@ const error = ref(null)
 
 onMounted(async () => {
   try {
+    console.log('API_BASE utilisé:', API_BASE)
     const response = await axios.get(`${API_BASE}/messages`)
     messages.value = response.data
   } catch (err) {
