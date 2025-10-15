@@ -128,14 +128,12 @@ resource "aws_instance" "thread" {
 
     docker pull ghcr.io/woorzz/forum-anonyme-thread:${var.image_tag}
 
-    # Récupérer sa propre IP publique via metadata
-    SELF_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-
+    # Démarrage avec les bonnes variables d'environnement Nuxt
     docker run -d --name marinelangrez-thread \
       -p 80:3000 \
-      -e API_URL=http://${aws_instance.api.public_ip}:3000 \
-      -e SENDER_URL=http://${aws_instance.sender.public_ip}:8080 \
-      -e THREAD_URL=http://$SELF_IP \
+      -e NUXT_PUBLIC_API_URL=http://${aws_instance.api.public_ip}:3000 \
+      -e NUXT_PUBLIC_THREAD_URL=http://\$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4) \
+      -e NUXT_PUBLIC_SENDER_URL=http://${aws_instance.sender.public_ip}:8080 \
       --restart unless-stopped \
       ghcr.io/woorzz/forum-anonyme-thread:${var.image_tag}
 
@@ -181,13 +179,12 @@ resource "aws_instance" "sender" {
 
     docker pull ghcr.io/woorzz/forum-anonyme-sender:${var.image_tag}
 
-    SELF_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-
+    # Démarrage avec les bonnes variables d'environnement Nuxt
     docker run -d --name marinelangrez-sender \
       -p 8080:3000 \
-      -e API_URL=http://${aws_instance.api.public_ip}:3000 \
-      -e SENDER_URL=http://$SELF_IP:8080 \
-      -e THREAD_URL=http://${aws_instance.thread.public_ip} \
+      -e NUXT_PUBLIC_API_URL=http://${aws_instance.api.public_ip}:3000 \
+      -e NUXT_PUBLIC_THREAD_URL=http://${aws_instance.thread.public_ip} \
+      -e NUXT_PUBLIC_SENDER_URL=http://\$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):8080 \
       --restart unless-stopped \
       ghcr.io/woorzz/forum-anonyme-sender:${var.image_tag}
 

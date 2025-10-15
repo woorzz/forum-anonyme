@@ -39,21 +39,14 @@
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
 
+const config = useRuntimeConfig()
 const messages = ref([])
 const pending = ref(true)
 const error = ref(null)
 
-// Utiliser window.RUNTIME_CONFIG au lieu de useRuntimeConfig
-const getApiBase = () => {
-  if (typeof window !== 'undefined' && window.RUNTIME_CONFIG) {
-    return window.RUNTIME_CONFIG.API_URL
-  }
-  return 'http://localhost:3000'
-}
-
 onMounted(async () => {
   try {
-    const API_BASE = getApiBase()
+    const API_BASE = config.public.apiUrl
     console.log('API_BASE utilisé:', API_BASE)
     const response = await axios.get(`${API_BASE}/messages`)
     messages.value = response.data

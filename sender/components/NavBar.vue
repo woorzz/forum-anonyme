@@ -24,15 +24,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-
-const threadUrl = ref('http://localhost/thread')
-const senderUrl = ref('http://localhost:8080/sender')
-
-onMounted(() => {
-  if (typeof window !== 'undefined' && window.RUNTIME_CONFIG) {
-    threadUrl.value = `${window.RUNTIME_CONFIG.THREAD_URL}/thread`
-    senderUrl.value = `${window.RUNTIME_CONFIG.SENDER_URL}/sender`
-  }
-})
+const config = useRuntimeConfig()
+const threadUrl = `${config.public.threadUrl}/thread`
+const senderUrl = `${config.public.senderUrl}/sender`
 </script>
