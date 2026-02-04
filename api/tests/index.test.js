@@ -1,5 +1,5 @@
 jest.mock('../db', () => ({
-  query: jest.fn()
+  query: jest.fn(),
 }));
 
 const request = require('supertest');
@@ -19,8 +19,8 @@ describe('GET /messages', () => {
     pool.query.mockResolvedValueOnce({
       rows: [
         { id: 1, pseudo: 'Marine', text: 'Coucou', created_at: new Date() },
-        { id: 2, pseudo: 'Bob', text: 'Hello', created_at: new Date() }
-      ]
+        { id: 2, pseudo: 'Bob', text: 'Hello', created_at: new Date() },
+      ],
     });
 
     const res = await request(app).get('/messages');
@@ -35,20 +35,20 @@ describe('POST /messages', () => {
       id: 3,
       pseudo: 'Testeur',
       text: 'Message test',
-      created_at: new Date()
+      created_at: new Date(),
     };
 
     pool.query.mockResolvedValueOnce({ rows: [message] });
 
     const res = await request(app).post('/messages').send({
       pseudo: 'Testeur',
-      text: 'Message test'
+      text: 'Message test',
     });
 
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({
       pseudo: 'Testeur',
-      text: 'Message test'
+      text: 'Message test',
     });
   });
 

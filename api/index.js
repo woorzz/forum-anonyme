@@ -11,7 +11,6 @@ app.use('/messages', messageRoutes);
 app.get('/hello', (_, res) => res.json({ message: 'Hello World!' }));
 app.get('/', (_, res) => res.json({ message: 'API is running' }));
 
-
 if (require.main === module) {
   app.listen(3000, () => console.log('API listening on 3000'));
 }

@@ -52,3 +52,8 @@ output "ssh_commands" {
     sender   = "ssh -i ~/.ssh/marinelangrez-forum-keypair.pem ubuntu@${aws_instance.sender.public_ip}"
   }
 }
+
+output "image_tag" {
+  description = "Docker image tag being deployed"
+  value       = var.image_tag
+}

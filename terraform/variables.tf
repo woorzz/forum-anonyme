@@ -38,7 +38,7 @@ variable "github_token" {
 variable "image_tag" {
   description = "Docker image tag to deploy"
   type        = string
-  default     = "b30033e"
+  default     = "d7e8b0e"
 }
 
 variable "private_key_path" {
